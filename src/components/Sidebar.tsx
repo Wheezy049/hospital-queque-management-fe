@@ -23,7 +23,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { title: "Overview", href: "/admin", icon: LayoutGrid },
-  { title: "Queue", href: "/admin/queue", icon: ListOrdered },
+  { title: "Queque", href: "/admin/queque", icon: ListOrdered },
   { title: "Appointments", href: "/admin/appointments", icon: CalendarCheck },
   { title: "Departments", href: "/admin/departments", icon: Building2 },
   { title: "Profile", href: "/admin/profile", icon: UserCircle2 },
@@ -38,7 +38,7 @@ function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex md:flex-col w-[280px] border-r border-border bg-card">
+    <aside className="hidden md:flex md:flex-col md:w-[280px] border-r border-border bg-card">
       {/* Logo */}
       <div className="border-b border-border p-6">
         <Link href="/admin" className="flex items-center gap-3">
