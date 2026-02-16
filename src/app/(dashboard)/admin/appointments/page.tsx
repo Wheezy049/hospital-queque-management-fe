@@ -1,12 +1,9 @@
 "use client";
-
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import { CalendarCheck, Info, CheckCircle2, Ban } from "lucide-react";
-
 import { api } from "@/lib/api/endpoints";
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 
 const container = {
   hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
 export default function AppointmentsPage() {

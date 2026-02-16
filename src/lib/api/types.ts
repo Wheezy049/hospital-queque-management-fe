@@ -24,12 +24,18 @@ export type Appointment = {
   patientId: string;
 };
 
-export type QueueStatus = "WAITING" | "ACTIVE" | "DONE";
+export type QuequeStatus = "WAITING" | "ACTIVE" | "DONE";
 
-export type QueueItem = {
+export type QuequeItem = {
   id: string;
   appointmentId: string;
   position: number;
-  status: QueueStatus;
+  status: QuequeStatus;
   createdAt: string;
 };
+
+export type NextQuequeItem = {
+  appointmentId: string;
+  position: number;
+  status: QuequeStatus;
+}

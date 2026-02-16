@@ -1,7 +1,6 @@
 "use client";
-
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -11,10 +10,8 @@ import {
   RefreshCw,
   UserRound,
 } from "lucide-react";
-
 import { api } from "@/lib/api/endpoints";
-import type { QueueItem } from "@/lib/api/types";
-
+import type { QuequeItem } from "@/lib/api/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,10 +28,10 @@ import {
 
 const container = {
   hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
-function badgeVariant(status: QueueItem["status"]) {
+function badgeVariant(status: QuequeItem["status"]) {
   switch (status) {
     case "ACTIVE":
       return "default";

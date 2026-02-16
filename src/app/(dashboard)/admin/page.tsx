@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, easeOut } from "framer-motion";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarCheck,
@@ -11,10 +11,8 @@ import {
   CheckCircle2,
   RefreshCw,
 } from "lucide-react";
-
 import { api } from "@/lib/api/endpoints";
-import type { QueueItem } from "@/lib/api/types";
-
+import type { QuequeItem } from "@/lib/api/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-function statusBadgeVariant(status: QueueItem["status"]) {
-  // you can tweak these later
+function statusBadgeVariant(status: QuequeItem["status"]) {
   switch (status) {
     case "ACTIVE":
       return "default";
@@ -57,13 +54,13 @@ const container = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { staggerChildren: 0.06, duration: 0.35, ease: "easeOut" },
+    transition: { staggerChildren: 0.06, duration: 0.35, ease: easeOut },
   },
 };
 
 const item = {
   hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: easeOut } },
 };
 
 function StatCard({
@@ -118,12 +115,14 @@ function LoadingGrid() {
 
 export default function AdminOverviewPage() {
   const qc = useQueryClient();
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
-
-const departmentsQuery = useQuery({
+  const departmentsQuery = useQuery({
     queryKey: ["departments"],
-    queryFn: api.departments.list,
+    queryFn: () => api.departments.list(),
   });
+
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>(() => 
+    departmentsQuery.data?.[0]?.id ?? ""
+  );
   const nextMutation = useMutation({
     mutationFn: () => api.queue.next({ departmentId }),
     onSuccess: async () => {
@@ -165,14 +164,6 @@ const departmentsQuery = useQuery({
   const isError = queueQuery.isError || departmentsQuery.isError;
 
   const queuePreview = queue.slice(0, 6);
-
-
-  useEffect(() => {
-    const first = departmentsQuery.data?.[0]?.id;
-    if (!departmentId && first) {
-      setDepartmentId(first);
-    };
-  }, [departmentsQuery.data, departmentId]);
 
   return (
     <motion.div

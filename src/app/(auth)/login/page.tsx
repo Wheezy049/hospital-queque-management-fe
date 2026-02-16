@@ -45,11 +45,9 @@ export default function LoginPage() {
 
       if (!res?.token) throw new Error("No token returned from server.");
 
-      // If your backend also returns user, you can gate here.
-      // Otherwise we gate after /auth/me
       setToken(res.token);
 
-      await refetchMe(); // loads /auth/me using the token
+      await refetchMe();
       
       if (user?.role !== "ADMIN") {
         throw new Error("Access denied: Admins only.");
@@ -68,7 +66,6 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/* subtle background decoration */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-28 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />

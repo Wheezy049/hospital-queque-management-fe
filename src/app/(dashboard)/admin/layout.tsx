@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { useAuth } from "@/providers/auth-provider";
+import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,14 +14,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   React.useEffect(() => {
     if (!isLoading) {
       if (!isAuthed) router.replace("/login");
-      else if (user?.role !== "ADMIN") router.replace("/login"); // simple gate
+      else if (user?.role !== "ADMIN") router.replace("/login");
     }
   }, [isLoading, isAuthed, user, router, pathname]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen grid place-items-center text-muted-foreground">
-        Loading...
+         <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     );
   }

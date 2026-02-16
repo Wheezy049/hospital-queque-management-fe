@@ -1,5 +1,5 @@
 import { http } from "./http";
-import type { Appointment, Department, QueueItem, User } from "./types";
+import type { Appointment, Department, NextQuequeItem, QuequeItem, User } from "./types";
 
 export const api = {
   auth: {
@@ -31,7 +31,7 @@ export const api = {
     const qs = new URLSearchParams();
     if (params?.type) qs.set("type", params.type);
     const suffix = qs.toString() ? `?${qs.toString()}` : "";
-    return http<any[]>(`/appointments/my-appointments${suffix}`);
+    return http<Appointment[]>(`/appointments/my-appointments${suffix}`);
   },
 
   complete: (id: string) =>
@@ -64,11 +64,11 @@ export const api = {
   listAdmin: (params: { departmentId: string; date?: string }) => {
     const qs = new URLSearchParams({ departmentId: params.departmentId });
     if (params.date) qs.set("date", params.date);
-    return http<QueueItem[]>(`/queque/get-queque?${qs.toString()}`);
+    return http<QuequeItem[]>(`/queque/get-queque?${qs.toString()}`);
   },
 
   next: (body: { departmentId: string; date?: string }) =>
-    http<any, typeof body>("/queque/next", { method: "POST", body }),
+    http<NextQuequeItem, typeof body>("/queque/next", { method: "POST", body }),
 
   move: (id: string, direction: "UP" | "DOWN") =>
     http<{ id: string; position: number; status: string }, { direction: "UP" | "DOWN" }>(
