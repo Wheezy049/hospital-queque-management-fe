@@ -1,9 +1,10 @@
 "use client";
 import React, { useContext, createContext } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { clearToken, getToken } from "@/lib/auth/token";
-import { api } from "@/lib/api/endpoints";
+import { useQueryClient } from "@tanstack/react-query";
+import { clearToken } from "@/lib/auth/token";
+import { useMe } from "@/lib/hooks/auth/useMe";
+import { queryKeys } from "@/lib/queryKeys";
 
 type AuthUser = {
   id: string;
@@ -24,25 +25,20 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const token = getToken();
   const queryClient = useQueryClient();
 
-  const meQuery = useQuery({
-    queryKey: ["auth-me"],
-    queryFn: api.auth.me,
-    enabled: !!token, // only try if token exists
-  });
+  const meQuery = useMe()
 
   const logout = () => {
     clearToken();
-    queryClient.removeQueries({ queryKey: ["auth-me"] });
+    queryClient.removeQueries({ queryKey: queryKeys.me });
     router.push("/login");
   };
 
   const value: AuthContextValue = {
     user: (meQuery.data as AuthUser) ?? null,
     isLoading: meQuery.isLoading,
-    isAuthed: !!token && !!meQuery.data,
+    isAuthed: !!meQuery.data,
     logout,
     refetchMe: () => meQuery.refetch(),
   };

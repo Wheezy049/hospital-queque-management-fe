@@ -1,68 +1,65 @@
 "use client";
 import Image from "next/image";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { api } from "@/lib/api/endpoints";
-import { setToken } from "@/lib/auth/token";
-import { useAuth } from "@/providers/auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useLogin } from "@/lib/hooks/auth/useLogin";
+import { useMe } from "@/lib/hooks/auth/useMe";
 
 function LoginPage() {
   const router = useRouter();
-  const { refetchMe, user } = useAuth();
+  const { data: user, isLoading } = useMe();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const loginMutation = useLogin();
 
-  const isDisabled = useMemo(() => loading || !email.trim() || !password.trim(), [loading, email, password]);
+  const isDisabled = useMemo(
+    () => loginMutation.isPending || !email.trim() || !password.trim(),
+    [loginMutation.isPending, email, password]
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const errorMessage =
+    loginMutation.error instanceof Error
+      ? loginMutation.error.message
+      : null
 
-    if (!email.trim() || !password.trim()) {
-      const msg = "Email and password are required.";
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
 
-    setLoading(true);
-    try {
-      const res = await api.auth.login({
+    loginMutation.mutate(
+      {
         email: email.trim().toLowerCase(),
         password,
-      });
-
-      if (!res?.token) throw new Error("No token returned from server.");
-
-      setToken(res.token);
-
-      await refetchMe();
-      
-      if (user?.role !== "ADMIN") {
-        throw new Error("Access denied: Admins only.");
+      },
+      {
+        onError: (err: Error) => {
+          toast.error(err.message || "Login failed")
+        },
       }
+    )
+  }
 
-      toast.success("Login successful");
-      router.replace("/admin");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (isLoading) return
+    if (!user) return
+
+    if (user.role !== "ADMIN") {
+      toast.error("Access denied: Admins only")
+      return
     }
-  };
+
+    toast.success("Login successful")
+    router.replace("/admin")
+
+  }, [user, isLoading, router])
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -97,7 +94,7 @@ function LoginPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
+                  disabled={loginMutation.isPending}
                 />
               </div>
 
@@ -112,7 +109,7 @@ function LoginPage() {
                     autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
+                    disabled={loginMutation.isPending}
                   />
 
                   <button
@@ -120,17 +117,17 @@ function LoginPage() {
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                    disabled={loading}
+                    disabled={loginMutation.isPending}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
 
-                {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
               </div>
 
               <Button type="submit" className="w-full rounded-xl" disabled={isDisabled}>
-                {loading ? (
+                {loginMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Signing in...
