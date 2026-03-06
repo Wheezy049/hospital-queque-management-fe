@@ -23,7 +23,7 @@ const container = {
   show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
-export default function DepartmentsPage() {
+function DepartmentsPage() {
   const qc = useQueryClient();
   const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
 
@@ -77,7 +77,6 @@ export default function DepartmentsPage() {
         </Card>
       ) : null}
 
-      {/* Create */}
       <Card className="rounded-2xl border-border/60 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -104,7 +103,6 @@ export default function DepartmentsPage() {
         </CardContent>
       </Card>
 
-      {/* List */}
       <Card className="rounded-2xl border-border/60 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -168,3 +166,5 @@ export default function DepartmentsPage() {
     </motion.div>
   );
 }
+
+export default DepartmentsPage;

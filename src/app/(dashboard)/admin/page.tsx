@@ -113,7 +113,7 @@ function LoadingGrid() {
   );
 }
 
-export default function AdminOverviewPage() {
+function AdminOverviewPage() {
   const qc = useQueryClient();
   const departmentsQuery = useQuery({
     queryKey: ["departments"],
@@ -134,15 +134,14 @@ export default function AdminOverviewPage() {
   
   const departmentId = selectedDepartmentId || firstDepartmentId;
 
-  // Queue (admin)
+  // admin queue
   const queueQuery = useQuery({
   queryKey: ["queue", "today", departmentId],
   queryFn: () => api.queue.listAdmin({ departmentId }),
   enabled: !!departmentId,
 });
 
-  // Departments
-
+  // departments
   const completeCurrentMutation = useMutation({
     mutationFn: (appointmentId: string) => api.appointments.complete(appointmentId),
     onSuccess: async () => {
@@ -154,8 +153,6 @@ export default function AdminOverviewPage() {
   const waitingCount = queue.filter((q) => q.status === "WAITING").length;
   const activeItem = queue.find((q) => q.status === "ACTIVE") ?? null;
 
-  // For MVP: use queue length as “today’s appointments being handled”
-  // Replace with real /appointments/today when you add it.
   const todayAppointmentsCount = queue.length;
 
   const departmentsCount = departmentsQuery.data?.length ?? 0;
@@ -172,7 +169,6 @@ export default function AdminOverviewPage() {
       animate="show"
       className="space-y-6"
     >
-      {/* Top heading block */}
       <motion.div variants={item} className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">
@@ -208,7 +204,7 @@ export default function AdminOverviewPage() {
         </div>
       </motion.div>
 
-      {/* Stats */}
+      {/* stats summary card */}
       {isLoading ? (
         <LoadingGrid />
       ) : isError ? (
@@ -253,9 +249,7 @@ export default function AdminOverviewPage() {
         </div>
       )}
 
-      {/* Main grid */}
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* Quick actions */}
         <motion.div variants={item} className="lg:col-span-1">
           <Card className="rounded-2xl border-border/60 shadow-sm">
             <CardHeader className="pb-2">
@@ -393,7 +387,6 @@ export default function AdminOverviewPage() {
         </motion.div>
       </div>
 
-      {/* Optional: small footer card */}
       <motion.div variants={item}>
         <Card className="rounded-2xl border-border/60">
           <CardContent className="p-5 flex items-center justify-between flex-wrap gap-3">
@@ -412,3 +405,5 @@ export default function AdminOverviewPage() {
     </motion.div>
   );
 }
+
+export default AdminOverviewPage;

@@ -53,17 +53,16 @@ function todayISO() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export default function AdminQueuePage() {
+function AdminQueuePage() {
   const qc = useQueryClient();
   const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
 
-  // load departments (admin)
+  // load departments admin
   const departmentsQuery = useQuery({
     queryKey: ["departments", hospitalId],
     queryFn: () => api.departments.list({ hospitalId }),
   });
 
-  // avoid useEffect setState: derive default department from data
   const [selectedDepartmentId, setSelectedDepartmentId] = React.useState<string>("");
   const firstDepartmentId = departmentsQuery.data?.[0]?.id ?? "";
   const departmentId = selectedDepartmentId || firstDepartmentId;
@@ -109,7 +108,6 @@ export default function AdminQueuePage() {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">Queue</h1>
@@ -119,7 +117,6 @@ export default function AdminQueuePage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-          {/* Department */}
           <Select value={departmentId} onValueChange={setSelectedDepartmentId}>
             <SelectTrigger className="w-full sm:w-[240px] rounded-xl">
               <SelectValue placeholder="Select department" />
@@ -133,7 +130,6 @@ export default function AdminQueuePage() {
             </SelectContent>
           </Select>
 
-          {/* Date */}
           <Input
             className="rounded-xl sm:w-[160px]"
             value={date}
@@ -141,7 +137,6 @@ export default function AdminQueuePage() {
             placeholder="YYYY-MM-DD"
           />
 
-          {/* Refresh */}
           <Button
             variant="outline"
             className="rounded-xl"
@@ -166,7 +161,6 @@ export default function AdminQueuePage() {
         </Card>
       ) : null}
 
-      {/* Stats + actions */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="rounded-2xl border-border/60 shadow-sm lg:col-span-2">
           <CardHeader className="pb-2">
@@ -243,7 +237,7 @@ export default function AdminQueuePage() {
                         </div>
                       </div>
 
-                      {/* Move controls */}
+                      {/* move controls */}
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
@@ -338,3 +332,5 @@ export default function AdminQueuePage() {
     </motion.div>
   );
 }
+
+export default AdminQueuePage;

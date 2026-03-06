@@ -2,7 +2,7 @@
 import React from "react";
 import { motion, easeOut } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
-import { CalendarCheck, Info, CheckCircle2, Ban } from "lucide-react";
+import { CalendarCheck, CheckCircle2, Ban } from "lucide-react";
 import { api } from "@/lib/api/endpoints";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,7 @@ const container = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
-
-export default function AppointmentsPage() {
+function AppointmentsPage() {
   const [appointmentId, setAppointmentId] = React.useState("");
 
   const completeMutation = useMutation({
@@ -36,7 +35,6 @@ export default function AppointmentsPage() {
         </p>
       </div>
 
-      {/* Admin actions */}
       <Card className="rounded-2xl border-border/60 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -106,31 +104,8 @@ export default function AppointmentsPage() {
           ) : null}
         </CardContent>
       </Card>
-
-      {/* Why no create appointment here */}
-      <Card className="rounded-2xl border-border/60">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Info className="h-4 w-4" />
-            Creating appointments
-          </CardTitle>
-          <CardDescription>
-            Your backend currently blocks admin from creating appointments.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p>
-            In your controller: <span className="font-mono">Only patients can book appointments</span>.
-          </p>
-          <p>
-            To generate test data now, create an appointment using a PATIENT token (Postman), then it will appear in Queue.
-          </p>
-          <p className="text-xs">
-            If you want admin to create appointments for patients, add an admin endpoint like
-            <span className="font-mono"> POST /appointments/admin-create</span>.
-          </p>
-        </CardContent>
-      </Card>
     </motion.div>
   );
 }
+
+export default AppointmentsPage;

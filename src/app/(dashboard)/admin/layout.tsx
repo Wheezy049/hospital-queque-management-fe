@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import React, { useEffect} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
@@ -11,7 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { isLoading, isAuthed, user } = useAuth();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoading) {
       if (!isAuthed) router.replace("/login");
       else if (user?.role !== "ADMIN") router.replace("/login");
@@ -20,8 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) {
     return (
-      <div className="min-h-screen grid place-items-center text-muted-foreground">
-         <Loader2 className="h-10 w-10 animate-spin" />
+      <div className="min-h-screen grid place-items-center">
+         <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
       </div>
     );
   }

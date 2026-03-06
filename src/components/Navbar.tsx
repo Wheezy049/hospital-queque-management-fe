@@ -44,7 +44,7 @@ const pageMeta: Record<string, { title: string; subtitle: string; ctaHref?: stri
   },
 };
 
-export default function Navbar() {
+function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -78,7 +78,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
       <div className="h-20 flex items-center justify-between px-4 md:px-6">
-        {/* Left */}
         <div className="flex items-center gap-3">
           <div className="md:hidden">
             {isMenuOpen ? (
@@ -98,9 +97,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Right */}
         <div className="flex items-center gap-2">
-          {/* CTA */}
           {meta.ctaHref && meta.ctaLabel ? (
             <Button asChild className="hidden md:flex rounded-xl">
               <Link href={meta.ctaHref}>
@@ -114,7 +111,6 @@ export default function Navbar() {
             <Bell className="h-4 w-4" />
           </Button>
 
-          {/* User menu */}
           <div className="relative" ref={dropdownRef}>
             <Button
               variant="outline"
@@ -178,3 +174,5 @@ export default function Navbar() {
     </header>
   );
 }
+
+export default Navbar;
