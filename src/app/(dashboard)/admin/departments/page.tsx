@@ -1,9 +1,7 @@
 "use client";
 import React from "react";
 import { motion, easeOut } from "framer-motion";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Plus, RefreshCw } from "lucide-react";
-import { api } from "@/lib/api/endpoints";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCreateDepartment, useListDepartments } from "@/lib/hooks/useDepartments";
 
 const container = {
   hidden: { opacity: 0, y: 10 },
@@ -24,23 +23,24 @@ const container = {
 };
 
 function DepartmentsPage() {
-  const qc = useQueryClient();
   const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
 
   const [name, setName] = React.useState("");
 
-  const departmentsQuery = useQuery({
-    queryKey: ["departments", hospitalId],
-    queryFn: () => api.departments.list({ hospitalId }),
-  });
+  const departmentsQuery = useListDepartments(hospitalId);
 
-  const createMutation = useMutation({
-    mutationFn: () => api.departments.create({ name: name.trim(), hospitalId }),
-    onSuccess: async () => {
-      setName("");
-      await qc.invalidateQueries({ queryKey: ["departments", hospitalId] });
-    },
-  });
+  const createMutation = useCreateDepartment();
+
+  const handleCreate = () => {
+    if (!name.trim()) return
+
+    createMutation.mutate(
+      { name: name.trim(), hospitalId },
+      {
+        onSuccess: () => setName("")
+      }
+    )
+  }
 
   const canCreate = !!hospitalId && name.trim().length >= 2 && !createMutation.isPending;
 
@@ -94,7 +94,7 @@ function DepartmentsPage() {
           />
           <Button
             className="rounded-xl"
-            onClick={() => createMutation.mutate()}
+            onClick={handleCreate}
             disabled={!canCreate}
           >
             <Plus className="mr-2 h-4 w-4" />

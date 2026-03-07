@@ -70,10 +70,10 @@ export const api = {
   next: (body: { departmentId: string; date?: string }) =>
     http<NextQuequeItem, typeof body>("/queque/next", { method: "POST", body }),
 
-  move: (id: string, direction: "UP" | "DOWN") =>
-    http<{ id: string; position: number; status: string }, { direction: "UP" | "DOWN" }>(
-      `/queque/${id}/move`,
-      { method: "PATCH", body: { direction } }
-    ),
+  move: (body: { id: string; direction: "UP" | "DOWN" }) =>
+  http<{ id: string; position: number; status: string }, { direction: "UP" | "DOWN" }>(
+    `/queque/${body.id}/move`,
+    { method: "PATCH", body: { direction: body.direction } }
+  )
 }
 };

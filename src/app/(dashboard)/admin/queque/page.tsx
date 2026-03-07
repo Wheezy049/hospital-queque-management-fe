@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { motion, easeOut } from "framer-motion";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
   ArrowUp,
@@ -10,7 +9,6 @@ import {
   RefreshCw,
   UserRound,
 } from "lucide-react";
-import { api } from "@/lib/api/endpoints";
 import type { QuequeItem } from "@/lib/api/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useListAdminQueue, useMoveQueue, useNextQueue } from "@/lib/hooks/useQueue";
+import { useListDepartments } from "@/lib/hooks/useDepartments";
+import { useCompleteAppointment } from "@/lib/hooks/useAppointments";
 
 const container = {
   hidden: { opacity: 0, y: 10 },
@@ -54,55 +55,47 @@ function todayISO() {
 }
 
 function AdminQueuePage() {
-  const qc = useQueryClient();
+
   const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
 
   // load departments admin
-  const departmentsQuery = useQuery({
-    queryKey: ["departments", hospitalId],
-    queryFn: () => api.departments.list({ hospitalId }),
-  });
+  const departmentsQuery = useListDepartments(hospitalId)
 
   const [selectedDepartmentId, setSelectedDepartmentId] = React.useState<string>("");
+
   const firstDepartmentId = departmentsQuery.data?.[0]?.id ?? "";
+
   const departmentId = selectedDepartmentId || firstDepartmentId;
 
   // date filter (optional)
   const [date, setDate] = React.useState<string>(todayISO());
 
   // queue query
-  const queueQuery = useQuery({
-    queryKey: ["queue", "byDate", departmentId, date],
-    queryFn: () => api.queue.listAdmin({ departmentId, date }),
-    enabled: !!departmentId,
-    refetchInterval: 10_000, // near-real-time
-  });
+  const queueQuery = useListAdminQueue({
+    departmentId,
+    date,
+  })
 
-  const queue = (queueQuery.data ?? []).slice().sort((a, b) => a.position - b.position);
+  const queue = React.useMemo(() => {
+    return (queueQuery.data ?? []).slice().sort((a, b) => a.position - b.position)
+  }, [queueQuery.data])
+
   const waitingCount = queue.filter((q) => q.status === "WAITING").length;
+
   const activeItem = queue.find((q) => q.status === "ACTIVE") ?? null;
 
-  const nextMutation = useMutation({
-    mutationFn: () => api.queue.next({ departmentId, date }),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["queue", "byDate", departmentId, date] });
-    },
-  });
+  const nextMutation = useNextQueue()
 
-  const moveMutation = useMutation({
-    mutationFn: (vars: { id: string; direction: "UP" | "DOWN" }) =>
-      api.queue.move(vars.id, vars.direction),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["queue", "byDate", departmentId, date] });
-    },
-  });
+  const handleNext = () => {
 
-  const completeCurrentMutation = useMutation({
-    mutationFn: (appointmentId: string) => api.appointments.complete(appointmentId),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["queue", "byDate", departmentId, date] });
-    },
-  });
+    if (!departmentId.trim()) return;
+
+    nextMutation.mutate({ departmentId: departmentId.trim(), date })
+  }
+
+  const moveMutation = useMoveQueue()
+
+  const completeCurrentMutation = useCompleteAppointment()
 
   const canOperate = !!departmentId && !!date;
 
@@ -278,7 +271,7 @@ function AdminQueuePage() {
           <CardContent className="space-y-3">
             <Button
               className="w-full rounded-xl"
-              onClick={() => nextMutation.mutate()}
+              onClick={handleNext}
               disabled={!canOperate || nextMutation.isPending}
             >
               {nextMutation.isPending ? "Calling..." : "Call Next"}

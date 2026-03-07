@@ -1,13 +1,12 @@
 "use client";
 import React from "react";
 import { motion, easeOut } from "framer-motion";
-import { useMutation } from "@tanstack/react-query";
 import { CalendarCheck, CheckCircle2, Ban } from "lucide-react";
-import { api } from "@/lib/api/endpoints";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useCancelAppointment, useCompleteAppointment } from "@/lib/hooks/useAppointments";
 
 const container = {
   hidden: { opacity: 0, y: 10 },
@@ -16,13 +15,18 @@ const container = {
 function AppointmentsPage() {
   const [appointmentId, setAppointmentId] = React.useState("");
 
-  const completeMutation = useMutation({
-    mutationFn: (id: string) => api.appointments.complete(id),
-  });
+  const completeMutation = useCompleteAppointment()
+  const cancelMutation = useCancelAppointment()
 
-  const cancelMutation = useMutation({
-    mutationFn: (id: string) => api.appointments.cancel(id),
-  });
+  const handleComplete = () => {
+    if (!appointmentId.trim()) return
+    completeMutation.mutate(appointmentId.trim())
+  }
+
+  const handleCancel = () => {
+    if (!appointmentId.trim()) return
+    cancelMutation.mutate(appointmentId.trim())
+  }
 
   const disabled = appointmentId.trim().length < 5;
 
@@ -57,7 +61,7 @@ function AppointmentsPage() {
 
             <Button
               className="rounded-xl"
-              onClick={() => completeMutation.mutate(appointmentId.trim())}
+              onClick={handleComplete}
               disabled={disabled || completeMutation.isPending}
             >
               <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -67,7 +71,7 @@ function AppointmentsPage() {
             <Button
               variant="destructive"
               className="rounded-xl"
-              onClick={() => cancelMutation.mutate(appointmentId.trim())}
+              onClick={handleCancel}
               disabled={disabled || cancelMutation.isPending}
             >
               <Ban className="mr-2 h-4 w-4" />

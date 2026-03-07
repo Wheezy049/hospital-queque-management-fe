@@ -28,7 +28,6 @@ function ProfilePage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
-        {/* Profile Summary Card */}
         <Card className="h-fit rounded-2xl border-border/60 shadow-sm">
           <CardContent className="pt-6 text-center space-y-4">
             <div className="mx-auto h-24 w-24 rounded-full grid place-items-center bg-primary text-primary-foreground font-bold text-4xl shadow-sm">
@@ -46,7 +45,6 @@ function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Details Form Card */}
         <Card className="rounded-2xl border-border/60 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Account Details</CardTitle>
