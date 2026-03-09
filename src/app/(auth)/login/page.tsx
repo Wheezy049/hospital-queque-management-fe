@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useLogin } from "@/lib/hooks/auth/useLogin";
-import { useMe } from "@/lib/hooks/auth/useMe";
+import { useAuth } from "@/providers/auth-provider";
+import Link from "next/link";
 
 function LoginPage() {
   const router = useRouter();
-  const { data: user, isLoading } = useMe();
+  const { user, isLoading } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -51,13 +52,12 @@ function LoginPage() {
     if (isLoading) return
     if (!user) return
 
-    if (user.role !== "ADMIN") {
-      toast.error("Access denied: Admins only")
-      return
-    }
-
     toast.success("Login successful")
-    router.replace("/admin")
+    if (user.role === "ADMIN") {
+      router.replace("/admin")
+    } else {
+      router.replace("/patient")
+    }
 
   }, [user, isLoading, router])
 
@@ -137,7 +137,11 @@ function LoginPage() {
                 )}
               </Button>
 
-              <p className="text-center text-xs text-muted-foreground">Authorized hospital staff only.</p>
+              <p className="text-center text-sm text-muted-foreground">
+                Does not have an account? <Link href="/signup" className="text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
             </form>
           </CardContent>
         </Card>

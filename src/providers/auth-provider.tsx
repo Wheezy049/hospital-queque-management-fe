@@ -31,6 +31,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   const logout = () => {
     clearToken();
+    queryClient.setQueryData(queryKeys.me, null);
     queryClient.removeQueries({ queryKey: queryKeys.me });
     router.push("/login");
   };

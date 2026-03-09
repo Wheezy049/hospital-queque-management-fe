@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 import {
   LayoutGrid,
   ListOrdered,
@@ -12,6 +13,7 @@ import {
   UserCircle2,
   LogOut,
   LucideIcon,
+  BookUser,
 } from "lucide-react";
 
 type NavItem = {
@@ -20,7 +22,7 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-const navItems: NavItem[] = [
+const adminNavItems: NavItem[] = [
   { title: "Overview", href: "/admin", icon: LayoutGrid },
   { title: "Queque", href: "/admin/queque", icon: ListOrdered },
   { title: "Appointments", href: "/admin/appointments", icon: CalendarCheck },
@@ -28,19 +30,32 @@ const navItems: NavItem[] = [
   { title: "Profile", href: "/admin/profile", icon: UserCircle2 },
 ];
 
+const patientNavItems: NavItem[] = [
+  { title: "Overview", href: "/patient", icon: LayoutGrid },
+  { title: "My Appointments", href: "/patient/appointments", icon: CalendarCheck },
+  { title: "Book Appointment", href: "/patient/book", icon: BookUser },
+  { title: "Queque Status", href: "/patient/queue", icon: ListOrdered },
+  { title: "Profile", href: "/patient/profile", icon: UserCircle2 },
+];
+
 function isActivePath(pathname: string, href: string) {
-  if (href === "/admin") return pathname === href;
+  if (href === "/admin" || href === "/patient") return pathname === href;
   return pathname.startsWith(href);
 }
 
 function Sidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  const isAdmin = user?.role === "ADMIN";
+  const navItems = isAdmin ? adminNavItems : patientNavItems;
+  const homeHref = isAdmin ? "/admin" : "/patient";
+  const dashboardType = isAdmin ? "Admin Dashboard" : "Patient Dashboard";
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-[280px] border-r border-border bg-card">
-      {/* Logo */}
       <div className="border-b border-border p-6">
-        <Link href="/admin" className="flex items-center gap-3">
+        <Link href={homeHref} className="flex items-center gap-3">
           <div className="">
             <Image
               src="/logo.png"
@@ -53,7 +68,7 @@ function Sidebar() {
           </div>
           <div className="leading-tight whitespace-nowrap">
             <p className="font-semibold text-foreground">Hospital Queue</p>
-            <p className="text-xs text-muted-foreground">Admin Dashboard</p>
+            <p className="text-xs text-muted-foreground">{dashboardType}</p>
           </div>
         </Link>
       </div>
@@ -96,9 +111,11 @@ function Sidebar() {
         </div>
       </nav>
 
-      {/* Footer */}
       <div className="px-6 py-4 border-t border-border">
-        <button className="w-full flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+        <button
+          onClick={() => logout()}
+          className="w-full flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           <LogOut className="h-4 w-4" />
           Log out
         </button>

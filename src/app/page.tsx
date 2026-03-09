@@ -6,14 +6,19 @@ import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
-  const { isAuthed, isLoading } = useAuth();
+  const { isAuthed, isLoading, user } = useAuth();
 
   useEffect(() => {
     if (!isLoading) {
-      if (isAuthed) router.replace("/admin");
-      else router.replace("/login");
+      if (isAuthed){
+        if(user?.role === "ADMIN") {
+          router.replace("/admin");
+        } else {
+          router.replace("/patient");
+        }
+      }else router.replace("/login");
     }
-  }, [isLoading, isAuthed, router]);
+  }, [isLoading, isAuthed, router, user]);
 
   return (
     <div className="min-h-screen grid place-items-center">

@@ -4,12 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Bell, Menu, X, User2, Settings, LogOut, ListOrdered, LucideIcon } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  X,
+  User2,
+  Settings,
+  LogOut,
+  ListOrdered,
+  LucideIcon,
+  BookUser,
+} from "lucide-react";
 import { formatHeaderDate } from "@/lib/date";
 import { useAuth } from "@/providers/auth-provider";
 
-const pageMeta: Record<string, { title: string; subtitle: string; ctaHref?: string; ctaLabel?: string; ctaIcon?: LucideIcon }> =
-{
+const adminPageMeta: Record<
+  string,
+  { title: string; subtitle: string; ctaHref?: string; ctaLabel?: string; ctaIcon?: LucideIcon }
+> = {
   "/admin": {
     title: "Welcome back 👋",
     subtitle: "Overview of today’s activity.",
@@ -44,9 +56,42 @@ const pageMeta: Record<string, { title: string; subtitle: string; ctaHref?: stri
   },
 };
 
+const patientPageMeta: Record<
+  string,
+  { title: string; subtitle: string; ctaHref?: string; ctaLabel?: string; ctaIcon?: LucideIcon }
+> = {
+  "/patient": {
+    title: "Welcome back 👋",
+    subtitle: "Overview of your appointments and queue status.",
+    ctaHref: "/patient/book",
+    ctaLabel: "Book Appointment",
+    ctaIcon: BookUser,
+  },
+  "/patient/appointments": {
+    title: "Your Appointments",
+    subtitle: "Here are your upcoming appointments.",
+    ctaHref: "/patient/book",
+    ctaLabel: "Book Appointment",
+    ctaIcon: BookUser,
+  },
+  "/patient/book": {
+    title: "Book an Appointment",
+    subtitle: "Choose a department and a doctor.",
+  },
+  "/patient/queue": {
+    title: "Your Queue Status",
+    subtitle: "Check your position in the waiting line.",
+  },
+  "/patient/profile": {
+    title: "Your Profile",
+    subtitle: "Your personal details.",
+  },
+};
+
 function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,12 +107,17 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const pageMeta = isAdmin ? adminPageMeta : patientPageMeta;
+  const homePath = isAdmin ? "/admin" : "/patient";
+  const profilePath = isAdmin ? "/admin/profile" : "/patient/profile";
+  const settingsPath = isAdmin ? "/admin/settings" : "/patient/settings";
+
   const meta = useMemo(() => {
     // find best match (so /admin/queue/123 still matches /admin/queue)
     const keys = Object.keys(pageMeta).sort((a, b) => b.length - a.length);
-    const key = keys.find((k) => pathname.startsWith(k)) ?? "/admin";
+    const key = keys.find((k) => pathname.startsWith(k)) ?? homePath;
     return pageMeta[key];
-  }, [pathname]);
+  }, [pathname, pageMeta, homePath]);
 
   const dateLabel = formatHeaderDate(new Date());
   const displayName = user?.name || "Admin";
@@ -136,7 +186,7 @@ function Navbar() {
 
                 <div className="space-y-1">
                   <Link
-                    href="/admin/profile"
+                    href={profilePath}
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted transition-colors"
                     onClick={() => setIsProfileOpen(false)}
                   >
@@ -145,7 +195,7 @@ function Navbar() {
                   </Link>
 
                   <Link
-                    href="/admin/settings"
+                    href={settingsPath}
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg hover:bg-muted transition-colors"
                     onClick={() => setIsProfileOpen(false)}
                   >
