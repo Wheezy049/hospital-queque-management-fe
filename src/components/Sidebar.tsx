@@ -53,7 +53,7 @@ function Sidebar() {
   const dashboardType = isAdmin ? "Admin Dashboard" : "Patient Dashboard";
 
   return (
-    <aside className="hidden md:flex md:flex-col md:w-[280px] border-r border-border bg-card">
+    <aside className="hidden md:flex md:flex-col md:w-[250px] border-r border-border bg-card">
       <div className="border-b border-border p-6">
         <Link href={homeHref} className="flex items-center gap-3">
           <div className="">

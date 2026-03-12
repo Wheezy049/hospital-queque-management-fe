@@ -14,7 +14,7 @@ import Link from "next/link";
 
 function LoginPage() {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refetchMe } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -41,6 +41,10 @@ function LoginPage() {
         password,
       },
       {
+        onSuccess: () => {
+          toast.success("Login successful")
+          refetchMe()
+        },
         onError: (err: Error) => {
           toast.error(err.message || "Login failed")
         },
@@ -52,7 +56,6 @@ function LoginPage() {
     if (isLoading) return
     if (!user) return
 
-    toast.success("Login successful")
     if (user.role === "ADMIN") {
       router.replace("/admin")
     } else {
@@ -63,11 +66,6 @@ function LoginPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-28 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
-      </div>
-
       <div className="relative flex min-h-screen items-center justify-center px-4">
         <Card className="w-full max-w-md border border-border/60 shadow-sm">
           <CardHeader className="space-y-3 text-center">

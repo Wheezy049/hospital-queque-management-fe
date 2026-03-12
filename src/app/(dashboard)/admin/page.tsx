@@ -138,7 +138,8 @@ function AdminOverviewPage() {
 
   const departmentsCount = departmentsQuery.data?.length ?? 0;
 
-  const isLoading = queueQuery.isLoading || departmentsQuery.isLoading;
+  const isQueueLoading = departmentId ? queueQuery.isPending : false;
+  const isLoading = departmentsQuery.isPending || isQueueLoading;
   const isError = queueQuery.isError || departmentsQuery.isError;
 
   const queuePreview = queue.slice(0, 6);
@@ -202,7 +203,12 @@ function AdminOverviewPage() {
           </Card>
         </motion.div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        >
           <StatCard
             title="Today’s Appointments"
             value={todayAppointmentsCount}
@@ -227,7 +233,7 @@ function AdminOverviewPage() {
             icon={Building2}
             helper="Configured departments."
           />
-        </div>
+        </motion.div>
       )}
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -314,7 +320,7 @@ function AdminOverviewPage() {
             </CardHeader>
 
             <CardContent className="space-y-3">
-              {queueQuery.isLoading ? (
+              {isQueueLoading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-12 w-full rounded-xl" />

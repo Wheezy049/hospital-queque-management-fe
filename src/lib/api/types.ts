@@ -17,11 +17,17 @@ export type AppointmentStatus = "PENDING" | "WAITING" | "DONE" | "CANCELLED";
 
 export type Appointment = {
   id: string;
-  date: string;
-  time: string;
+  scheduledAt: string;
   status: AppointmentStatus;
-  departmentId: string;
-  patientId: string;
+  department: {
+    name: string;
+    hospital: { name: string };
+  };
+  queue?: {
+    position: number;
+    status: QuequeStatus;
+  };
+  patientId?: string;
 };
 
 export type QuequeStatus = "WAITING" | "ACTIVE" | "DONE";

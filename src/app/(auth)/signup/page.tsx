@@ -63,11 +63,6 @@ function SignupPage() {
 
     return (
         <div className="relative h-full bg-background my-10">
-            <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-28 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-                <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
-            </div>
-
             <div className="relative flex min-h-screen items-center justify-center px-4">
                 <Card className="w-full max-w-md border border-border/60 shadow-sm">
                     <CardHeader className="space-y-3 text-center">
