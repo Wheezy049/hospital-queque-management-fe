@@ -16,10 +16,24 @@ export const api = {
         auth: false,
       }),
     me: () => http<User>("/auth/me"),
+    createDoctor: (body: { name: string; email: string; password: string; departmentId: string; hospitalId: string }) =>
+      http<User, typeof body>("/auth/create-doctor", {
+        method: "POST",
+        body,
+      }),
+    listDoctors: (hospitalId?: string) =>
+      http<User[]>(`/auth/doctors${hospitalId ? `?hospitalId=${hospitalId}` : ""}`),
   },
 
   appointments: {
-    create: (body: { departmentId: string; hospitalId: string; date: string; time: string }) =>
+    create: (body: { 
+      departmentId: string; 
+      hospitalId: string; 
+      date: string; 
+      time: string;
+      description?: string;
+      duration?: number;
+    }) =>
       http<
         {
           appointmentId: string;
@@ -40,6 +54,16 @@ export const api = {
       return http<Appointment[]>(`/appointments/my-appointments${suffix}`);
     },
 
+    list: (params?: { departmentId?: string; status?: string; search?: string; type?: "past" | "upcoming" }) => {
+      const qs = new URLSearchParams();
+      if (params?.departmentId) qs.set("departmentId", params.departmentId);
+      if (params?.status) qs.set("status", params.status);
+      if (params?.search) qs.set("search", params.search);
+      if (params?.type) qs.set("type", params.type);
+      const suffix = qs.toString() ? `?${qs.toString()}` : "";
+      return http<Appointment[]>(`/appointments${suffix}`);
+    },
+
     complete: (id: string) =>
       http<{ message: string; appointmentId: string; status: string }>(`/appointments/${id}/complete`, {
         method: "PATCH",
@@ -48,6 +72,12 @@ export const api = {
     cancel: (id: string) =>
       http<{ message: string; appointmentId: string; status: string }>(`/appointments/${id}/cancel`, {
         method: "PATCH",
+      }),
+
+    addNotes: (id: string, notes: string) =>
+      http<{ message: string; appointmentId: string; notes: string }>(`/appointments/${id}/notes`, {
+        method: "PATCH",
+        body: { notes },
       }),
   },
 

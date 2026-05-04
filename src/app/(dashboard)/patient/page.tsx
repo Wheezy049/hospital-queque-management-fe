@@ -7,6 +7,7 @@ import {
   BookUser,
   ListOrdered,
   ArrowRight,
+  Activity
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -132,19 +133,26 @@ function PatientOverviewPage() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid gap-4 sm:grid-cols-2"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
           <StatCard
             title="Upcoming Appointments"
             value={upcomingCount}
             icon={CalendarClock}
-            helper="Appointments scheduled for the future."
+            helper="Visits scheduled for the future."
           />
           <StatCard
-            title="Past Appointments"
+            title="Medical History"
             value={pastCount}
             icon={CalendarCheck}
-            helper="Appointments you have completed."
+            helper="Your completed past visits."
+          />
+          {/* Today's Specific Stats for Patient */}
+          <StatCard
+            title="Today's Status"
+            value={upcomingQuery.data?.some(a => a.scheduledAt && a.scheduledAt.split('T')[0] === new Date().toISOString().split('T')[0]) ? "Scheduled" : "No Visit"}
+            icon={Activity}
+            helper="Your status for today's clinic."
           />
         </motion.div>
       )}
@@ -184,7 +192,7 @@ function PatientOverviewPage() {
                 <div className="rounded-xl border border-border bg-background p-8 text-center">
                   <p className="text-sm font-semibold text-foreground">No upcoming appointments</p>
                   <p className="text-xs text-muted-foreground mt-1 mb-4">
-                    You don't have any appointments scheduled currently.
+                    You don&#39;t have any appointments scheduled currently.
                   </p>
                   <Button asChild variant="outline" className="rounded-xl">
                     <Link href="/patient/book">Book Now</Link>

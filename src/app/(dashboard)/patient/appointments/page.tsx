@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { motion, easeOut } from "framer-motion";
-import { CalendarCheck, CalendarClock, Ban, MapPin, Clock, Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarCheck, CalendarClock, Ban, MapPin, Clock, Calendar, Timer } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,14 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: easeOut } },
 };
 
+function formatWaitTime(minutes: number) {
+  if (minutes < 60) return `${minutes} minutes`;
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return `${hrs} ${hrs === 1 ? 'hour' : 'hours'}`;
+  return `${hrs} ${hrs === 1 ? 'hour' : 'hours'} and ${mins} ${mins === 1 ? 'minute' : 'minutes'}`;
+}
+
 function statusBadgeVariant(status: Appointment["status"]) {
   switch (status) {
     case "PENDING":
@@ -47,7 +55,7 @@ function AppointmentCard({ appointment, isPast }: { appointment: Appointment, is
     if (confirm("Are you sure you want to cancel this appointment?")) {
       cancelMutation.mutate(appointment.id, {
         onSuccess: () => toast.success("Appointment cancelled."),
-        onError: (err: any) => toast.error(err.message || "Failed to cancel.")
+        onError: (err: Error) => toast.error(err.message || "Failed to cancel.")
       });
     }
   };
@@ -85,6 +93,12 @@ function AppointmentCard({ appointment, isPast }: { appointment: Appointment, is
                   <Calendar className="h-3.5 w-3.5" />
                   {format(appointmentDate, "EEEE, MMMM do, yyyy")}
                 </p>
+                {appointment.estimatedWaitTime !== undefined && appointment.status !== "DONE" && appointment.status !== "CANCELLED" && (
+                   <p className="text-sm font-medium text-primary mt-2 flex items-center gap-1.5 bg-primary/5 w-fit px-2 py-0.5 rounded-md border border-primary/10">
+                     <Timer className="h-3.5 w-3.5" />
+                     Estimated wait: {formatWaitTime(appointment.estimatedWaitTime)}
+                   </p>
+                )}
               </div>
               <Badge variant={statusBadgeVariant(appointment.status)} className="rounded-lg shrink-0">
                 {appointment.status}
@@ -119,6 +133,23 @@ function AppointmentCard({ appointment, isPast }: { appointment: Appointment, is
 function AppointmentsList({ type }: { type: "upcoming" | "past" }) {
   const query = useMyAppointments(type);
 
+  const filteredAppointments = React.useMemo(() => {
+    const data = query.data ?? [];
+    const now = new Date();
+
+    return data.filter((apt) => {
+      const scheduledDate = new Date(apt.scheduledAt);
+      const isPastDate = scheduledDate < now;
+      const isFinished = apt.status === "DONE" || apt.status === "CANCELLED";
+
+      if (type === "past") {
+        return isFinished || isPastDate;
+      } else {
+        return !isFinished && !isPastDate;
+      }
+    });
+  }, [query.data, type]);
+
   if (query.isLoading) {
     return (
       <div className="space-y-4 mt-6">
@@ -140,27 +171,34 @@ function AppointmentsList({ type }: { type: "upcoming" | "past" }) {
     );
   }
 
-  const appointments = query.data ?? [];
-
-  if (appointments.length === 0) {
+  if (filteredAppointments.length === 0) {
     return (
-      <motion.div variants={item} className="mt-8 flex flex-col items-center justify-center p-12 bg-muted/20 rounded-2xl border border-border/60 text-center">
-        <div className="w-16 h-16 rounded-full bg-background border border-border mb-4 flex items-center justify-center">
+      <motion.div 
+        variants={item} 
+        initial="hidden" 
+        animate="show" 
+        className="mt-8 flex flex-col items-center justify-center p-16 bg-muted/30 rounded-3xl border-2 border-dashed border-border/60 text-center space-y-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
+      >
+        <div className="w-16 h-16 rounded-full bg-background border border-border shadow-sm flex items-center justify-center">
           {type === "upcoming" ? (
-            <CalendarClock className="h-8 w-8 text-muted-foreground/60" />
+            <CalendarClock className="h-8 w-8 text-primary/60" />
           ) : (
             <CalendarCheck className="h-8 w-8 text-muted-foreground/60" />
           )}
         </div>
-        <h3 className="text-lg font-semibold text-foreground">No {type} appointments</h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-          {type === "upcoming"
-            ? "You don't have any upcoming visits scheduled."
-            : "You haven't completed any visits yet."}
-        </p>
+        <div>
+          <h3 className="text-lg font-bold text-foreground">
+            {type === "upcoming" ? "No upcoming appointments" : "No past visits found"}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-[280px] mx-auto">
+            {type === "upcoming"
+              ? "You don't have any upcoming visits scheduled at the moment."
+              : "Your medical history for this hospital is currently empty."}
+          </p>
+        </div>
         {type === "upcoming" && (
-          <Button asChild className="mt-6 rounded-xl">
-            <a href="/patient/book">Book Now</a>
+          <Button asChild className="mt-2 rounded-xl shadow-md px-6">
+            <a href="/patient/book">Book an Appointment</a>
           </Button>
         )}
       </motion.div>
@@ -169,7 +207,7 @@ function AppointmentsList({ type }: { type: "upcoming" | "past" }) {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 mt-6">
-      {appointments.map((apt) => (
+      {filteredAppointments.map((apt) => (
         <AppointmentCard key={apt.id} appointment={apt} isPast={type === "past"} />
       ))}
     </motion.div>
@@ -201,7 +239,7 @@ function PatientAppointmentsPage() {
       </motion.div>
 
       <motion.div variants={item}>
-        <Tabs defaultValue="upcoming" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+        <Tabs defaultValue="upcoming" value={activeTab} onValueChange={(v) => setActiveTab(v as "upcoming" | "past")} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2 rounded-xl p-1 bg-muted/50 border border-border/40">
             <TabsTrigger value="upcoming" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground">
               <CalendarClock className="w-4 h-4 mr-2" />

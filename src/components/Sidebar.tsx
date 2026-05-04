@@ -14,6 +14,7 @@ import {
   LogOut,
   LucideIcon,
   BookUser,
+  Users,
 } from "lucide-react";
 
 type NavItem = {
@@ -22,12 +23,19 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-const adminNavItems: NavItem[] = [
-  { title: "Overview", href: "/admin", icon: LayoutGrid },
-  { title: "Queque", href: "/admin/queque", icon: ListOrdered },
-  { title: "Appointments", href: "/admin/appointments", icon: CalendarCheck },
-  { title: "Departments", href: "/admin/departments", icon: Building2 },
-  { title: "Profile", href: "/admin/profile", icon: UserCircle2 },
+const superAdminNavItems: NavItem[] = [
+  { title: "Dashboard", href: "/super-admin", icon: LayoutGrid },
+  { title: "Departments", href: "/super-admin/departments", icon: Building2 },
+  { title: "Manage Doctors", href: "/super-admin/doctors", icon: Users },
+  { title: "Global Queue", href: "/super-admin/queque", icon: ListOrdered },
+  { title: "Profile", href: "/super-admin/profile", icon: UserCircle2 },
+];
+
+const doctorNavItems: NavItem[] = [
+  { title: "Overview", href: "/doctor", icon: LayoutGrid },
+  { title: "Appointments", href: "/doctor/appointments", icon: CalendarCheck },
+  { title: "My Queue", href: "/doctor/queque", icon: ListOrdered },
+  { title: "Profile", href: "/doctor/profile", icon: UserCircle2 },
 ];
 
 const patientNavItems: NavItem[] = [
@@ -39,18 +47,33 @@ const patientNavItems: NavItem[] = [
 ];
 
 function isActivePath(pathname: string, href: string) {
-  if (href === "/admin" || href === "/patient") return pathname === href;
+  if (href === "/super-admin" || href === "/doctor" || href === "/patient") return pathname === href;
   return pathname.startsWith(href);
 }
 
 function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-
+  const isSuperAdmin = user?.role === "SUPER_ADMIN";
   const isAdmin = user?.role === "ADMIN";
-  const navItems = isAdmin ? adminNavItems : patientNavItems;
-  const homeHref = isAdmin ? "/admin" : "/patient";
-  const dashboardType = isAdmin ? "Admin Dashboard" : "Patient Dashboard";
+
+  let navItems: NavItem[] = [];
+  let dashboardType = "";
+  let homeHref = "/";
+
+  if (isSuperAdmin) {
+    navItems = superAdminNavItems;
+    dashboardType = "Super Admin";
+    homeHref = "/super-admin";
+  } else if (isAdmin) {
+    navItems = doctorNavItems;
+    dashboardType = "Doctor Dashboard";
+    homeHref = "/doctor";
+  } else {
+    navItems = patientNavItems;
+    dashboardType = "Patient Dashboard";
+    homeHref = "/patient";
+  }
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-[250px] border-r border-border bg-card">

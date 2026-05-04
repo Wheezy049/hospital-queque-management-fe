@@ -10,7 +10,9 @@ type AuthUser = {
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "PATIENT";
+  role: "SUPER_ADMIN" | "ADMIN" | "PATIENT";
+  departmentId?: string;
+  department?: { id: string; name: string };
 };
 
 type AuthContextValue = {
@@ -26,7 +28,6 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-
   const meQuery = useMe()
 
   const logout = () => {

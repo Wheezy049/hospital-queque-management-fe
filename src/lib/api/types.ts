@@ -1,10 +1,12 @@
-export type Role = "ADMIN" | "PATIENT";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "PATIENT";
 
 export type User = {
   id: string;
   name: string;
   email: string;
   role: Role;
+  departmentId?: string;
+  department?: { id: string; name: string };
 };
 
 export type Department = {
@@ -19,7 +21,12 @@ export type Appointment = {
   id: string;
   scheduledAt: string;
   status: AppointmentStatus;
+  description?: string;
+  duration?: number;
+  notes?: string;
+  estimatedWaitTime?: number;
   department: {
+    id: string;
     name: string;
     hospital: { name: string };
   };
@@ -28,16 +35,29 @@ export type Appointment = {
     status: QuequeStatus;
   };
   patientId?: string;
+  patient?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 };
 
 export type QuequeStatus = "WAITING" | "ACTIVE" | "DONE";
 
 export type QuequeItem = {
   id: string;
-  appointmentId: string;
+  appointmentId?: string;
   position: number;
   status: QuequeStatus;
-  createdAt: string;
+  createdAt?: string;
+  scheduledAt?: string;
+  appointment?: {
+    id: string;
+    patient?: {
+      name: string;
+      email?: string;
+    };
+  };
 };
 
 export type NextQuequeItem = {

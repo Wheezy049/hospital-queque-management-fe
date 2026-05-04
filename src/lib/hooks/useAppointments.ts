@@ -59,7 +59,28 @@ export function useCancelAppointment() {
 
 export function useMyAppointments(type?: "past" | "upcoming") {
     return useQuery({
-        queryKey: [...queryKeys.appointments, type],
+        queryKey: [...queryKeys.appointments, "my", type],
         queryFn: () => api.appointments.my({ type }),
+    })
+}
+
+export function useListAppointments(params?: { departmentId?: string; status?: string; search?: string; type?: "past" | "upcoming" }) {
+    return useQuery({
+        queryKey: [...queryKeys.appointments, "list", params],
+        queryFn: () => api.appointments.list(params),
+    })
+}
+
+export function useAddNotes() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ id, notes }: { id: string; notes: string }) => api.appointments.addNotes(id, notes),
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.appointments,
+            })
+        },
     })
 }

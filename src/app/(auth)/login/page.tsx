@@ -15,7 +15,6 @@ import Link from "next/link";
 function LoginPage() {
   const router = useRouter();
   const { user, isLoading, refetchMe } = useAuth();
-
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,8 +55,10 @@ function LoginPage() {
     if (isLoading) return
     if (!user) return
 
-    if (user.role === "ADMIN") {
-      router.replace("/admin")
+    if (user.role === "SUPER_ADMIN") {
+      router.replace("/super-admin")
+    } else if (user.role === "ADMIN") {
+      router.replace("/doctor")
     } else {
       router.replace("/patient")
     }
@@ -74,7 +75,7 @@ function LoginPage() {
             </div>
 
             <div className="space-y-1">
-              <CardTitle className="text-2xl font-semibold text-foreground">Admin Login</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-foreground">Welcome Back</CardTitle>
               <CardDescription className="text-muted-foreground">
                 Sign in to manage appointments and patient queue
               </CardDescription>
@@ -98,7 +99,6 @@ function LoginPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-
                 <div className="relative">
                   <Input
                     id="password"

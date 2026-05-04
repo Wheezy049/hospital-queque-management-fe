@@ -19,13 +19,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    const isAdminPath = pathname.startsWith("/admin");
+    const isSuperAdminPath = pathname.startsWith("/super-admin");
+    const isDoctorPath = pathname.startsWith("/doctor");
     const isPatientPath = pathname.startsWith("/patient");
 
-    if (isAdminPath && user?.role !== "ADMIN") {
-      router.replace("/patient");
+    if (isSuperAdminPath && user?.role !== "SUPER_ADMIN") {
+      router.replace(user?.role === "ADMIN" ? "/doctor" : "/patient");
+    } else if (isDoctorPath && user?.role !== "ADMIN") {
+      router.replace(user?.role === "SUPER_ADMIN" ? "/super-admin" : "/patient");
     } else if (isPatientPath && user?.role !== "PATIENT") {
-      router.replace("/admin");
+      router.replace(user?.role === "SUPER_ADMIN" ? "/super-admin" : "/doctor");
     }
   }, [isLoading, isAuthed, user, router, pathname]);
 

@@ -3,4 +3,6 @@ export const queryKeys = {
   appointments: ["appointments"],
   queue: ["queue"],
   departments: ["departments"],
+  doctors: ["doctors"]
+
 }

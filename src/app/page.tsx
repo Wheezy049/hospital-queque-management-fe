@@ -11,8 +11,10 @@ export default function Home() {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthed){
-        if(user?.role === "ADMIN") {
-          router.replace("/admin");
+        if(user?.role === "SUPER_ADMIN") {
+          router.replace("/super-admin");
+        } else if(user?.role === "ADMIN") {
+          router.replace("/doctor");
         } else {
           router.replace("/patient");
         }

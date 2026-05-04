@@ -5,7 +5,6 @@ import { Building2, Plus, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -22,23 +21,17 @@ const container = {
   show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
-function DepartmentsPage() {
+function SuperAdminDepartmentsPage() {
   const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
-
   const [name, setName] = React.useState("");
-
   const departmentsQuery = useListDepartments(hospitalId);
-
   const createMutation = useCreateDepartment();
 
   const handleCreate = () => {
     if (!name.trim()) return
-
     createMutation.mutate(
       { name: name.trim(), hospitalId },
-      {
-        onSuccess: () => setName("")
-      }
+      { onSuccess: () => setName("") }
     )
   }
 
@@ -50,10 +43,9 @@ function DepartmentsPage() {
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">Departments</h1>
           <p className="text-sm text-muted-foreground">
-            Create departments and view all departments in your hospital.
+            Configure hospital departments for queuing.
           </p>
         </div>
-
         <Button
           variant="outline"
           className="rounded-xl"
@@ -65,25 +57,13 @@ function DepartmentsPage() {
         </Button>
       </div>
 
-      {!hospitalId ? (
-        <Card className="rounded-2xl border-border/60">
-          <CardContent className="p-5">
-            <p className="text-sm font-semibold text-destructive">Missing hospitalId</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Set <span className="font-mono">NEXT_PUBLIC_HOSPITAL_ID</span> in{" "}
-              <span className="font-mono">.env.local</span> to create and load departments.
-            </p>
-          </CardContent>
-        </Card>
-      ) : null}
-
       <Card className="rounded-2xl border-border/60 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Building2 className="h-4 w-4" />
-            Create department
+            Create Department
           </CardTitle>
-          <CardDescription>Example: General Outpatient, Pediatrics, Pharmacy</CardDescription>
+          <CardDescription>Example: Emergency, Radiology, Dental</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col sm:flex-row gap-3">
           <Input
@@ -104,57 +84,30 @@ function DepartmentsPage() {
       </Card>
 
       <Card className="rounded-2xl border-border/60 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-base">All departments</CardTitle>
-            <CardDescription>
-              {departmentsQuery.isLoading
-                ? "Loading..."
-                : `${departmentsQuery.data?.length ?? 0} department(s)`}
-            </CardDescription>
-          </div>
-          <Badge variant="outline" className="rounded-lg">Hospital</Badge>
+        <CardHeader>
+          <CardTitle className="text-base">Existing Departments</CardTitle>
         </CardHeader>
-
         <CardContent>
           {departmentsQuery.isLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full rounded-xl" />
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl" />
               ))}
-            </div>
-          ) : departmentsQuery.isError ? (
-            <div className="rounded-xl border border-border bg-background p-5">
-              <p className="text-sm font-semibold text-destructive">
-                {(departmentsQuery.error as Error).message}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Confirm your backend route and hospitalId.
-              </p>
-            </div>
-          ) : (departmentsQuery.data?.length ?? 0) === 0 ? (
-            <div className="rounded-xl border border-border bg-background p-6 text-center">
-              <p className="text-sm font-semibold text-foreground">No departments yet</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Create your first department to start booking appointments.
-              </p>
             </div>
           ) : (
             <div className="rounded-xl border border-border overflow-hidden">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-muted/30">
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead className="text-right">ID</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {departmentsQuery.data!.map((d) => (
+                  {departmentsQuery.data?.map((d) => (
                     <TableRow key={d.id}>
                       <TableCell className="font-semibold">{d.name}</TableCell>
-                      <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                        {d.id}
-                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground">{d.id}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -167,4 +120,4 @@ function DepartmentsPage() {
   );
 }
 
-export default DepartmentsPage;
+export default SuperAdminDepartmentsPage;

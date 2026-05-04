@@ -15,12 +15,10 @@ import Link from "next/link";
 function SignupPage() {
     const router = useRouter();
     const { data: user, isLoading } = useMe();
-
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
-
 
     const registerMutation = useRegister();
 
@@ -108,7 +106,6 @@ function SignupPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-
                                 <div className="relative">
                                     <Input
                                         id="password"

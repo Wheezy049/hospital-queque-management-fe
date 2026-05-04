@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Bell,
-  Menu,
-  X,
   User2,
   Settings,
   LogOut,
@@ -18,41 +16,57 @@ import {
 import { formatHeaderDate } from "@/lib/date";
 import { useAuth } from "@/providers/auth-provider";
 
-const adminPageMeta: Record<
+const superAdminPageMeta: Record<
   string,
   { title: string; subtitle: string; ctaHref?: string; ctaLabel?: string; ctaIcon?: LucideIcon }
 > = {
-  "/admin": {
-    title: "Welcome back 👋",
-    subtitle: "Overview of today’s activity.",
-    ctaHref: "/admin/queue",
-    ctaLabel: "Go to Queue",
-    ctaIcon: ListOrdered,
+  "/super-admin": {
+    title: "Hospital Management",
+    subtitle: "Global overview and system configuration.",
   },
-  "/admin/queue": {
-    title: "Queue Management",
-    subtitle: "Call next patient and track progress.",
-    ctaHref: "/admin/queue",
-    ctaLabel: "Go to Queue",
-    ctaIcon: ListOrdered,
-  },
-  "/admin/appointments": {
-    title: "Appointments",
-    subtitle: "Manage bookings, cancellations, and completion.",
-    ctaHref: "/admin/queue",
-    ctaLabel: "Go to Queue",
-    ctaIcon: ListOrdered,
-  },
-  "/admin/departments": {
+  "/super-admin/departments": {
     title: "Departments",
-    subtitle: "Create departments and manage limits.",
-    ctaHref: "/admin/queue",
+    subtitle: "Manage hospital units and units.",
+  },
+  "/super-admin/doctors": {
+    title: "Medical Staff",
+    subtitle: "Manage doctors and department assignments.",
+  },
+  "/super-admin/queque": {
+    title: "Global Queue",
+    subtitle: "Real-time monitoring of all hospital queues.",
+  },
+  "/super-admin/profile": {
+    title: "Admin Profile",
+    subtitle: "Your administrative account settings.",
+  },
+};
+
+const doctorPageMeta: Record<
+  string,
+  { title: string; subtitle: string; ctaHref?: string; ctaLabel?: string; ctaIcon?: LucideIcon }
+> = {
+  "/doctor": {
+    title: "Doctor Dashboard",
+    subtitle: "Overview of your clinical activity.",
+    ctaHref: "/doctor/queque",
     ctaLabel: "Go to Queue",
     ctaIcon: ListOrdered,
   },
-  "/admin/profile": {
-    title: "Profile",
-    subtitle: "Your staff account details.",
+  "/doctor/appointments": {
+    title: "Appointments",
+    subtitle: "Manage patient bookings and notes.",
+    ctaHref: "/doctor/queque",
+    ctaLabel: "Go to Queue",
+    ctaIcon: ListOrdered,
+  },
+  "/doctor/queque": {
+    title: "Department Queue",
+    subtitle: "Manage patient flow and sessions.",
+  },
+  "/doctor/profile": {
+    title: "Medical Profile",
+    subtitle: "Your clinical staff account details.",
   },
 };
 
@@ -61,40 +75,35 @@ const patientPageMeta: Record<
   { title: string; subtitle: string; ctaHref?: string; ctaLabel?: string; ctaIcon?: LucideIcon }
 > = {
   "/patient": {
-    title: "Welcome back 👋",
-    subtitle: "Overview of your appointments and queue status.",
+    title: "Welcome 👋",
+    subtitle: "Track your health and appointments.",
     ctaHref: "/patient/book",
     ctaLabel: "Book Appointment",
     ctaIcon: BookUser,
   },
   "/patient/appointments": {
-    title: "Your Appointments",
-    subtitle: "Here are your upcoming appointments.",
+    title: "My Appointments",
+    subtitle: "Manage your upcoming visits.",
     ctaHref: "/patient/book",
     ctaLabel: "Book Appointment",
     ctaIcon: BookUser,
   },
   "/patient/book": {
-    title: "Book an Appointment",
-    subtitle: "Choose a department and a doctor.",
+    title: "New Appointment",
+    subtitle: "Book a slot with your preferred department.",
   },
   "/patient/queue": {
-    title: "Your Queue Status",
-    subtitle: "Check your position in the waiting line.",
-  },
-  "/patient/profile": {
-    title: "Your Profile",
-    subtitle: "Your personal details.",
+    title: "Queue Status",
+    subtitle: "Check your real-time waiting position.",
   },
 };
 
 function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const isSuperAdmin = user?.role === "SUPER_ADMIN";
   const isAdmin = user?.role === "ADMIN";
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,39 +116,29 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const pageMeta = isAdmin ? adminPageMeta : patientPageMeta;
-  const homePath = isAdmin ? "/admin" : "/patient";
-  const profilePath = isAdmin ? "/admin/profile" : "/patient/profile";
-  const settingsPath = isAdmin ? "/admin/settings" : "/patient/settings";
+  const pageMeta = isSuperAdmin ? superAdminPageMeta : isAdmin ? doctorPageMeta : patientPageMeta;
+  const homePath = isSuperAdmin ? "/super-admin" : isAdmin ? "/doctor" : "/patient";
+  const profilePath = isSuperAdmin ? "/super-admin/profile" : isAdmin ? "/doctor/profile" : "/patient/profile";
+  const settingsPath = isSuperAdmin ? "/super-admin/settings" : isAdmin ? "/doctor/settings" : "/patient/settings";
 
   const meta = useMemo(() => {
-    // find best match (so /admin/queue/123 still matches /admin/queue)
     const keys = Object.keys(pageMeta).sort((a, b) => b.length - a.length);
     const key = keys.find((k) => pathname.startsWith(k)) ?? homePath;
-    return pageMeta[key];
+    return pageMeta[key] || { title: "Dashboard", subtitle: "Welcome back." };
   }, [pathname, pageMeta, homePath]);
 
   const dateLabel = formatHeaderDate(new Date());
-  const displayName = user?.name || "Admin";
-  const initials = displayName?.[0]?.toUpperCase() ?? "A";
-
+  const displayName = user?.name || "User";
+  const initials = displayName?.[0]?.toUpperCase() ?? "U";
   const CtaIcon = meta.ctaIcon;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
       <div className="h-20 flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
-          <div className="md:hidden">
-            {isMenuOpen ? (
-              <X onClick={() => setIsMenuOpen(false)} className="h-6 w-6 text-foreground cursor-pointer" />
-            ) : (
-              <Menu onClick={() => setIsMenuOpen(true)} className="h-6 w-6 text-foreground cursor-pointer" />
-            )}
-          </div>
-
           <div className="leading-tight">
             <p className="text-sm font-bold text-foreground">
-              {meta.title === "Welcome back 👋" ? `Welcome back, ${displayName} 👋` : meta.title}
+              {meta.title.includes("Welcome") ? `${meta.title}, ${displayName}` : meta.title}
             </p>
             <p className="text-xs text-muted-foreground">
               {dateLabel} • {meta.subtitle}
@@ -180,7 +179,7 @@ function Navbar() {
                   </div>
                   <div className="overflow-hidden">
                     <p className="font-bold text-sm text-foreground truncate">{displayName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email ?? "admin@hospital.com"}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                   </div>
                 </div>
 

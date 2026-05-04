@@ -39,6 +39,9 @@ export async function http<TResponse, TBody = unknown>(
   // Handle expired/invalid token globally
   if (res.status === 401) {
     clearToken();
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+      window.location.href = '/login?expired=true';
+    }
   }
 
   const isJson = res.headers.get("content-type")?.includes("application/json");

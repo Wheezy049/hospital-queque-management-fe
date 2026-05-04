@@ -1,7 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { motion, easeOut } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, Building2, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Building2,
+  CheckCircle2,
+  ArrowRight,
+  FileText,
+  Timer
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,16 +47,25 @@ const TIME_SLOTS = Array.from({ length: 17 }, (_, i) => {
   return `${hour.toString().padStart(2, "0")}:${minute}`;
 });
 
+const DURATION_OPTIONS = [
+  { label: "15 Minutes", value: "15" },
+  { label: "30 Minutes", value: "30" },
+  { label: "45 Minutes", value: "45" },
+  { label: "1 Hour", value: "60" },
+];
+
 function PatientBookPage() {
   const router = useRouter();
   const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
-  
+
   const departmentsQuery = useListDepartments(hospitalId);
   const createMutation = useCreateAppointment();
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [departmentId, setDepartmentId] = useState("");
+  const [description, setDescription] = useState("");
+  const [duration, setDuration] = useState("30");
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Default to minimum date being today
@@ -57,18 +74,25 @@ function PatientBookPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !time || !departmentId) {
-      toast.error("Please fill in all fields (Department, Date, Time).");
+      toast.error("Please fill in all required fields (Department, Date, Time).");
       return;
     }
 
     createMutation.mutate(
-      { departmentId, hospitalId, date, time },
+      {
+        departmentId,
+        hospitalId,
+        date,
+        time,
+        description,
+        duration: parseInt(duration)
+      },
       {
         onSuccess: () => {
           setIsSuccess(true);
           toast.success("Appointment booked successfully!");
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
           toast.error(err.message || "Failed to book appointment.");
         },
       }
@@ -84,7 +108,7 @@ function PatientBookPage() {
       >
         <Card className="rounded-2xl border-border/60 shadow-lg text-center p-8 overflow-hidden relative">
           <div className="absolute top-0 inset-x-0 h-2 bg-primary"></div>
-          <motion.div 
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
@@ -129,8 +153,8 @@ function PatientBookPage() {
         <Card className="rounded-2xl border-border/60 shadow-sm">
           <CardHeader className="bg-muted/30 border-b border-border/40 pb-6 rounded-t-2xl">
             <CardTitle className="text-lg flex items-center gap-2">
-               <CalendarIcon className="h-5 w-5 text-primary" />
-               Appointment Details
+              <CalendarIcon className="h-5 w-5 text-primary" />
+              Appointment Details
             </CardTitle>
             <CardDescription>All fields are required to secure your slot.</CardDescription>
           </CardHeader>
@@ -191,7 +215,6 @@ function PatientBookPage() {
                     <SelectContent className="rounded-xl max-h-[280px]">
                       {date ? (
                         TIME_SLOTS.map((slot) => {
-                          // Simple past time check if selected date is today
                           const isToday = date === today;
                           const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
                           const [h, m] = slot.split(":").map(Number);
@@ -199,9 +222,9 @@ function PatientBookPage() {
                           const isPassed = isToday && slotMinutes <= currentMinutes;
 
                           return (
-                            <SelectItem 
-                              key={slot} 
-                              value={slot} 
+                            <SelectItem
+                              key={slot}
+                              value={slot}
                               disabled={isPassed}
                               className="py-2.5 cursor-pointer"
                             >
@@ -210,16 +233,49 @@ function PatientBookPage() {
                           );
                         })
                       ) : (
-                         <SelectItem value="none" disabled>Please select a date first</SelectItem>
+                        <SelectItem value="none" disabled>Please select a date first</SelectItem>
                       )}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
+              <div className="space-y-3">
+                <Label htmlFor="duration" className="text-sm font-semibold flex items-center gap-2">
+                  <Timer className="h-4 w-4 text-muted-foreground" />
+                  Estimated Duration
+                </Label>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger id="duration" className="w-full rounded-xl h-12 bg-background data-[state=open]:ring-primary">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {DURATION_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className="py-2.5 cursor-pointer">
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="description" className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  Reason for Visit (Optional)
+                </Label>
+                <textarea
+                  id="description"
+                  placeholder="Tell us a bit about why you are booking this appointment..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="rounded-xl bg-background focus-visible:ring-primary min-h-[100px]"
+                />
+              </div>
+
               <div className="pt-4 mt-8 border-t border-border/60 flex items-center justify-end">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={createMutation.isPending || !departmentId || !date || !time}
                   className="rounded-xl h-12 px-8 w-full sm:w-auto text-base font-semibold group relative overflow-hidden"
                 >
