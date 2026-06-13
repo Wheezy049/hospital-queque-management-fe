@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyAppointments } from "@/lib/hooks/useAppointments";
 import { useListDepartments } from "@/lib/hooks/useDepartments";
-import { useListAdminQueue } from "@/lib/hooks/useQueue";
+import { useListPublicQueue } from "@/lib/hooks/useQueue";
 import { format } from "date-fns";
-import type { Appointment, QuequeItem } from "@/lib/api/types";
+import type { Appointment, QueueItem } from "@/lib/api/types";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useHospital } from "@/providers/hospital-provider";
 
 const container = {
   hidden: { opacity: 0, y: 12 },
@@ -27,7 +28,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: easeOut } },
 };
 
-function statusBadgeVariant(status: QuequeItem["status"]) {
+function statusBadgeVariant(status: QueueItem["status"]) {
   switch (status) {
     case "ACTIVE":
       return "default";
@@ -61,7 +62,7 @@ function LiveQueueView({
   // Let's assume queue.listAdmin still works if we pass department Id somehow, 
   // but if we don't have department ID here, we might need to rely on the appointment's `queue` object for the current user.
 
-  const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
+  const { activeHospitalId: hospitalId } = useHospital();
   const departmentsQuery = useListDepartments(hospitalId);
 
   const departmentId = useMemo(() => {
@@ -71,7 +72,7 @@ function LiveQueueView({
 
   const queueDate = appointment.scheduledAt ? appointment.scheduledAt.split("T")[0] : undefined;
 
-  const queueQuery = useListAdminQueue({ departmentId, date: queueDate });
+  const queueQuery = useListPublicQueue({ departmentId, date: queueDate });
 
   // Actually, we can just use the appointment itself if the queue query fails or isn't needed:
   const queueData = queueQuery.data ?? [];
@@ -85,7 +86,7 @@ function LiveQueueView({
       return {
         ...appointment.queue,
         appointmentId: appointment.id
-      } as QuequeItem;
+      } as QueueItem;
     }
     return null;
   }, [queueData, appointment]);
@@ -258,6 +259,13 @@ function PatientQueuePage() {
     return appointmentsQuery.data.find(apt => apt.scheduledAt && apt.scheduledAt.split("T")[0] === todayStr);
   }, [appointmentsQuery.data]);
 
+  // Find the next upcoming appointment (future slot)
+  const upcomingAppt = useMemo(() => {
+    if (!appointmentsQuery.data) return null;
+    const todayStr = new Date().toISOString().split("T")[0];
+    return appointmentsQuery.data.find(apt => apt.scheduledAt && apt.scheduledAt.split("T")[0] !== todayStr && apt.status === "WAITING");
+  }, [appointmentsQuery.data]);
+
   return (
     <motion.div
       variants={container}
@@ -298,6 +306,62 @@ function PatientQueuePage() {
           appointment={todayAppt}
           onRefresh={() => appointmentsQuery.refetch()}
         />
+      ) : upcomingAppt ? (
+        <motion.div variants={item}>
+          <Card className="rounded-2xl border-border/60 shadow-lg overflow-hidden relative">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-primary"></div>
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center text-center max-w-md mx-auto space-y-6">
+                <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <CalendarClock className="h-8 w-8 text-primary" />
+                </div>
+                
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-foreground">Upcoming Appointment</h2>
+                  <p className="text-sm text-muted-foreground">
+                    You have an upcoming appointment scheduled for this department.
+                  </p>
+                </div>
+
+                {/* Queue Details Card */}
+                <div className="w-full bg-muted/30 rounded-xl p-5 border border-border/60 space-y-4 text-left">
+                  <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">Department</span>
+                    <span className="text-sm font-bold text-foreground">{upcomingAppt.department?.name || "Unknown"}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">Scheduled Time</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {upcomingAppt.scheduledAt ? format(new Date(upcomingAppt.scheduledAt), "EEEE, MMM do 'at' h:mm a") : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                    <span className="text-sm font-medium text-muted-foreground">Your Queue Number</span>
+                    <span className="text-sm font-black text-primary text-base">#{upcomingAppt.queue?.position ?? "N/A"}</span>
+                  </div>
+                  {upcomingAppt.estimatedWaitTime !== undefined && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-muted-foreground">Estimated Wait</span>
+                      <span className="text-sm font-semibold text-primary">
+                        {upcomingAppt.estimatedWaitTime === 0 ? "0 minutes (First in line)" : `${upcomingAppt.estimatedWaitTime} minutes`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-xs text-primary/80 font-medium text-center">
+                  Note: The live queue tracker and navigation will activate on the day of your appointment.
+                </div>
+
+                <div className="flex items-center justify-center gap-3 w-full">
+                  <Button asChild variant="outline" className="rounded-xl w-full">
+                    <Link href="/patient/appointments">View Full Schedule</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
         <motion.div variants={item}>
           <Card className="rounded-2xl border-border/60 shadow-sm text-center p-12 overflow-hidden relative">

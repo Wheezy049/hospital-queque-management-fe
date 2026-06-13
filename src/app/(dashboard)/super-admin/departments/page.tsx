@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCreateDepartment, useListDepartments } from "@/lib/hooks/useDepartments";
+import { useHospital } from "@/providers/hospital-provider";
 
 const container = {
   hidden: { opacity: 0, y: 10 },
@@ -22,7 +23,7 @@ const container = {
 };
 
 function SuperAdminDepartmentsPage() {
-  const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
+  const { activeHospitalId: hospitalId } = useHospital();
   const [name, setName] = React.useState("");
   const departmentsQuery = useListDepartments(hospitalId);
   const createMutation = useCreateDepartment();

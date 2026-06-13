@@ -32,9 +32,9 @@ const superAdminPageMeta: Record<
     title: "Medical Staff",
     subtitle: "Manage doctors and department assignments.",
   },
-  "/super-admin/queque": {
+  "/super-admin/queue": {
     title: "Global Queue",
-    subtitle: "Real-time monitoring of all hospital queues.",
+    subtitle: "Real-time monitoring of all clinic queues.",
   },
   "/super-admin/profile": {
     title: "Admin Profile",
@@ -49,18 +49,18 @@ const doctorPageMeta: Record<
   "/doctor": {
     title: "Doctor Dashboard",
     subtitle: "Overview of your clinical activity.",
-    ctaHref: "/doctor/queque",
+    ctaHref: "/doctor/queue",
     ctaLabel: "Go to Queue",
     ctaIcon: ListOrdered,
   },
   "/doctor/appointments": {
     title: "Appointments",
     subtitle: "Manage patient bookings and notes.",
-    ctaHref: "/doctor/queque",
+    ctaHref: "/doctor/queue",
     ctaLabel: "Go to Queue",
     ctaIcon: ListOrdered,
   },
-  "/doctor/queque": {
+  "/doctor/queue": {
     title: "Department Queue",
     subtitle: "Manage patient flow and sessions.",
   },

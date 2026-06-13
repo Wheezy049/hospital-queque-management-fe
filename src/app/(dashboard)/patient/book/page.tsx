@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 import { useCreateAppointment } from "@/lib/hooks/useAppointments";
 import { useListDepartments } from "@/lib/hooks/useDepartments";
 import { useRouter } from "next/navigation";
+import { useHospital } from "@/providers/hospital-provider";
 
 const container = {
   hidden: { opacity: 0, y: 12 },
@@ -56,7 +57,7 @@ const DURATION_OPTIONS = [
 
 function PatientBookPage() {
   const router = useRouter();
-  const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
+  const { activeHospitalId: hospitalId } = useHospital();
 
   const departmentsQuery = useListDepartments(hospitalId);
   const createMutation = useCreateAppointment();

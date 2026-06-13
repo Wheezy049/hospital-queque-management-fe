@@ -176,10 +176,15 @@ function PatientOverviewPage() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Department: <span className="font-medium text-foreground">{nextAppointment.department?.name || "Unknown"}</span>
                     </p>
-                    <div className="mt-3">
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] font-semibold tracking-wider uppercase bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                         {nextAppointment.status}
                       </span>
+                      {nextAppointment.queue?.position !== undefined && (
+                        <span className="text-[10px] font-semibold tracking-wider uppercase bg-muted text-foreground px-2.5 py-1 rounded-full border border-border">
+                          Queue Position: #{nextAppointment.queue.position}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <Button asChild className="rounded-xl w-full md:w-auto">

@@ -42,6 +42,10 @@ function SignupPage() {
                 password,
             },
             {
+                onSuccess: () => {
+                    toast.success("Account created successfully! Please sign in.");
+                    router.push("/login");
+                },
                 onError: (err: Error) => {
                     toast.error(err.message || "Signup failed")
                 },
@@ -65,7 +69,7 @@ function SignupPage() {
                 <Card className="w-full max-w-md border border-border/60 shadow-sm">
                     <CardHeader className="space-y-3 text-center">
                         <div className="mx-auto h-16 w-16 rounded-2xl border border-border bg-card grid place-items-center overflow-hidden">
-                            <Image src="/logo.png" alt="Hospital Queue Logo" width={44} height={44} className="object-contain" priority />
+                            <Image src="/logo.png" alt="Qure Logo" width={44} height={44} className="object-contain" priority />
                         </div>
 
                         <div className="space-y-1">
@@ -96,7 +100,7 @@ function SignupPage() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="admin@hospital.com"
+                                    placeholder="patient@qure.com"
                                     autoComplete="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}

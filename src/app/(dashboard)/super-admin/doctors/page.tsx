@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useHospital } from "@/providers/hospital-provider";
 import {
   Select,
   SelectContent,
@@ -52,7 +53,7 @@ const container = {
 // };
 
 function SuperAdminDoctorsPage() {
-  const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
+  const { activeHospitalId: hospitalId } = useHospital();
   const deptsQuery = useListDepartments(hospitalId);
   const doctorsQuery = useListDoctors(hospitalId);
   const createMutation = useCreateDoctor();

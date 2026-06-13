@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import QueryProvider from "@/providers/query-provider";
 import AuthProvider from "@/providers/auth-provider";
+import { HospitalProvider } from "@/providers/hospital-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hospital Queue Management System",
-  description: "Hospital Queue Management System built with Next.js ",
+  title: "Qure - Smart Clinic Queue Management System",
+  description: "Qure is a modern, real-time clinic queue management system built to optimize patient wait times.",
   icons: {
     icon: { url: "/logo.png", type: "image/png" },
     shortcut: { url: "/logo.png", type: "image/png" },
@@ -37,8 +38,10 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            {children}
-            <ToastContainer />
+            <HospitalProvider>
+              {children}
+              <ToastContainer />
+            </HospitalProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

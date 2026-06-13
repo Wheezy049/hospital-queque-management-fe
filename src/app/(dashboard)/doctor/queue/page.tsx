@@ -9,7 +9,7 @@ import {
   RefreshCw,
   UserRound,
 } from "lucide-react";
-import type { QuequeItem } from "@/lib/api/types";
+import type { QueueItem } from "@/lib/api/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ const container = {
   show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
-function badgeVariant(status: QuequeItem["status"]) {
+function badgeVariant(status: QueueItem["status"]) {
   switch (status) {
     case "ACTIVE": return "default";
     case "WAITING": return "secondary";

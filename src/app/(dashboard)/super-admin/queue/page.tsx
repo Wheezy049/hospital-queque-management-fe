@@ -12,7 +12,7 @@ import {
   Clock,
   LayoutGrid
 } from "lucide-react";
-import type { QuequeItem } from "@/lib/api/types";
+import type { QueueItem } from "@/lib/api/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,13 +31,14 @@ import { useListDepartments } from "@/lib/hooks/useDepartments";
 import { useCompleteAppointment } from "@/lib/hooks/useAppointments";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useHospital } from "@/providers/hospital-provider";
 
 const container = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
-function badgeVariant(status: QuequeItem["status"]) {
+function badgeVariant(status: QueueItem["status"]) {
   switch (status) {
     case "ACTIVE": return "default";
     case "WAITING": return "secondary";
@@ -55,7 +56,7 @@ function todayISO() {
 }
 
 function GlobalQueuePage() {
-  const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? "";
+  const { activeHospitalId: hospitalId } = useHospital();
   const departmentsQuery = useListDepartments(hospitalId)
   const [selectedDepartmentId, setSelectedDepartmentId] = React.useState<string>("");
   const firstDepartmentId = departmentsQuery.data?.[0]?.id ?? "";

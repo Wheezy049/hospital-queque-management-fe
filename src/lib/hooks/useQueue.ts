@@ -18,6 +18,21 @@ export function useListAdminQueue({
   })
 }
 
+export function useListPublicQueue({
+  departmentId,
+  date,
+}: {
+  departmentId: string
+  date?: string
+}) {
+  return useQuery({
+    queryKey: [...queryKeys.queue, "public", departmentId, date],
+    queryFn: () => api.queue.listPublic({ departmentId, date }),
+    enabled: !!departmentId,
+    refetchInterval: 10000,
+  })
+}
+
 export function useNextQueue() {
   const queryClient = useQueryClient()
 

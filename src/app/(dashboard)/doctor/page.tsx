@@ -179,7 +179,7 @@ function DoctorOverviewPage() {
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 bg-muted/20">
             <CardTitle className="text-base">Current Queue</CardTitle>
             <Button asChild variant="ghost" size="sm" className="text-primary rounded-xl">
-              <a href="/doctor/queque">View All</a>
+              <a href="/doctor/queue">View All</a>
             </Button>
           </CardHeader>
           <CardContent className="p-0">

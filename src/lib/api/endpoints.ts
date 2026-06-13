@@ -1,5 +1,5 @@
 import { http } from "./http";
-import type { Appointment, Department, NextQuequeItem, QuequeItem, User } from "./types";
+import type { Appointment, Department, Hospital, NextQueueItem, QueueItem, User } from "./types";
 
 export const api = {
   auth: {
@@ -100,16 +100,25 @@ export const api = {
     listAdmin: (params: { departmentId: string; date?: string }) => {
       const qs = new URLSearchParams({ departmentId: params.departmentId });
       if (params.date) qs.set("date", params.date);
-      return http<QuequeItem[]>(`/queque/get-queque?${qs.toString()}`);
+      return http<QueueItem[]>(`/queue/get-queue?${qs.toString()}`);
+    },
+
+    listPublic: (params: { departmentId: string; date?: string }) => {
+      const qs = new URLSearchParams({ departmentId: params.departmentId });
+      if (params.date) qs.set("date", params.date);
+      return http<QueueItem[]>(`/queue/public?${qs.toString()}`);
     },
 
     next: (body: { departmentId: string; date?: string }) =>
-      http<NextQuequeItem, typeof body>("/queque/next", { method: "POST", body }),
+      http<NextQueueItem, typeof body>("/queue/next", { method: "POST", body }),
 
     move: (body: { id: string; direction: "UP" | "DOWN" }) =>
       http<{ id: string; position: number; status: string }, { direction: "UP" | "DOWN" }>(
-        `/queque/${body.id}/move`,
+        `/queue/${body.id}/move`,
         { method: "PATCH", body: { direction: body.direction } }
       )
+  },
+  hospitals: {
+    list: () => http<Hospital[]>("/hospitals"),
   }
 };

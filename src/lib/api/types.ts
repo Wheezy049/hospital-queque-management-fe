@@ -32,7 +32,7 @@ export type Appointment = {
   };
   queue?: {
     position: number;
-    status: QuequeStatus;
+    status: QueueStatus;
   };
   patientId?: string;
   patient?: {
@@ -42,13 +42,13 @@ export type Appointment = {
   };
 };
 
-export type QuequeStatus = "WAITING" | "ACTIVE" | "DONE";
+export type QueueStatus = "WAITING" | "ACTIVE" | "DONE";
 
-export type QuequeItem = {
+export type QueueItem = {
   id: string;
   appointmentId?: string;
   position: number;
-  status: QuequeStatus;
+  status: QueueStatus;
   createdAt?: string;
   scheduledAt?: string;
   appointment?: {
@@ -60,8 +60,13 @@ export type QuequeItem = {
   };
 };
 
-export type NextQuequeItem = {
+export type NextQueueItem = {
   appointmentId: string;
   position: number;
-  status: QuequeStatus;
-}
+  status: QueueStatus;
+};
+
+export type Hospital = {
+  id: string;
+  name: string;
+};

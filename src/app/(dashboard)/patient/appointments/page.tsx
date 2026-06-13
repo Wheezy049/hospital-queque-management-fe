@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, easeOut } from "framer-motion";
-import { CalendarCheck, CalendarClock, Ban, MapPin, Clock, Calendar, Timer } from "lucide-react";
+import { CalendarCheck, CalendarClock, Ban, MapPin, Clock, Calendar, Timer, ListOrdered } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -93,11 +93,21 @@ function AppointmentCard({ appointment, isPast }: { appointment: Appointment, is
                   <Calendar className="h-3.5 w-3.5" />
                   {format(appointmentDate, "EEEE, MMMM do, yyyy")}
                 </p>
-                {appointment.estimatedWaitTime !== undefined && appointment.status !== "DONE" && appointment.status !== "CANCELLED" && (
-                   <p className="text-sm font-medium text-primary mt-2 flex items-center gap-1.5 bg-primary/5 w-fit px-2 py-0.5 rounded-md border border-primary/10">
-                     <Timer className="h-3.5 w-3.5" />
-                     Estimated wait: {formatWaitTime(appointment.estimatedWaitTime)}
-                   </p>
+                {appointment.status !== "DONE" && appointment.status !== "CANCELLED" && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {appointment.queue?.position !== undefined && (
+                      <p className="text-sm font-medium text-foreground bg-muted px-2 py-0.5 rounded-md border border-border flex items-center gap-1.5">
+                        <ListOrdered className="h-3.5 w-3.5 text-muted-foreground" />
+                        Queue Position: #{appointment.queue.position}
+                      </p>
+                    )}
+                    {appointment.estimatedWaitTime !== undefined && (
+                      <p className="text-sm font-medium text-primary bg-primary/5 w-fit px-2 py-0.5 rounded-md border border-primary/10 flex items-center gap-1.5">
+                        <Timer className="h-3.5 w-3.5" />
+                        Estimated wait: {appointment.estimatedWaitTime === 0 ? "0 minutes (First in line)" : formatWaitTime(appointment.estimatedWaitTime)}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
               <Badge variant={statusBadgeVariant(appointment.status)} className="rounded-lg shrink-0">

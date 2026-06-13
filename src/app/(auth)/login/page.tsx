@@ -71,7 +71,7 @@ function LoginPage() {
         <Card className="w-full max-w-md border border-border/60 shadow-sm">
           <CardHeader className="space-y-3 text-center">
             <div className="mx-auto h-16 w-16 rounded-2xl border border-border bg-card grid place-items-center overflow-hidden">
-              <Image src="/logo.png" alt="Hospital Queue Logo" width={44} height={44} className="object-contain" priority />
+              <Image src="/logo.png" alt="Qure Logo" width={44} height={44} className="object-contain" priority />
             </div>
 
             <div className="space-y-1">
@@ -89,7 +89,7 @@ function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@hospital.com"
+                  placeholder="superadmin@qure.com"
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -136,7 +136,7 @@ function LoginPage() {
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                Does not have an account? <Link href="/signup" className="text-primary hover:underline">
+                Don't have an account? <Link href="/signup" className="text-primary hover:underline">
                   Sign up
                 </Link>
               </p>

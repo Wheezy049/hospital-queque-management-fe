@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useListDepartments } from "@/lib/hooks/useDepartments";
 import { useListDoctors } from "@/lib/hooks/useAuthActions";
+import { useHospital } from "@/providers/hospital-provider";
 
 const container = {
   hidden: { opacity: 0, y: 12 },
@@ -63,7 +64,7 @@ function StatCard({
 }
 
 function SuperAdminOverviewPage() {
-  const hospitalId = process.env.NEXT_PUBLIC_HOSPITAL_ID ?? ""
+  const { activeHospitalId: hospitalId } = useHospital();
   const departmentsQuery = useListDepartments(hospitalId)
   const doctorsQuery = useListDoctors(hospitalId)
   
@@ -144,7 +145,7 @@ function SuperAdminOverviewPage() {
                     <p className="text-xs text-muted-foreground">All systems are functioning normally.</p>
                   </div>
                   <Button asChild variant="ghost" className="text-primary rounded-xl text-xs">
-                    <a href="/super-admin/queque">View Global Queue <ArrowRight className="ml-1 h-3 w-3" /></a>
+                    <a href="/super-admin/queue">View Global Queue <ArrowRight className="ml-1 h-3 w-3" /></a>
                   </Button>
                </div>
             </CardContent>
